@@ -9,6 +9,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Reads Malaysia's Department of Environmental's API data from
@@ -31,6 +32,8 @@ public class ApiReader
     private static final Integer[] hourOptions = {1,2,3,4};
     private static final String myHazeURLPrefix = "http://apims.doe.gov.my/apims/hourly";
     private static final String myHazeURLPostfix = ".php?date=";
+    private static final int HOURS_PER_DAY = 24;
+    private static final String HOUR_DATA_HIGHLIGHT = "*"; 
     
     /**
      * 
@@ -107,10 +110,35 @@ public class ApiReader
         return this.doc;
     }
     
-    public void buildData()
+    private int[] getArrayHourData(int hourOption, 
+            int hourDataSize, Element data)
+    {
+        int[] hourData = new int[hourDataSize]; 
+        if (this.hourOption == 1)
+        {
+            for (int i=0; i<hourDataSize; i++)
+            {
+                try {
+                hourData[i] = Integer.parseInt(
+                        StringUtils.remove(data.child(i+2).text(),
+                                HOUR_DATA_HIGHLIGHT));
+                }
+                catch (NumberFormatException e) {
+                    hourData[i] = -1;
+                }
+            }
+        }
+        
+        return hourData;
+    }
+    
+    public ArrayList<MyHazeData> buildData()
     {
         ArrayList<MyHazeData> datas = new ArrayList<MyHazeData>();
-        MyHazeData tmp = new MyHazeData();
+        int hourDivider = hourOptions.length;
+        int hourDataSize = HOURS_PER_DAY / hourDivider;
+        int[] hourData = new int[hourDataSize]; 
+        
         if (this.doc != null)
         {
             //do more things
@@ -118,24 +146,36 @@ public class ApiReader
             
             for (Element data : tableData)
             {
-                System.out.println(data.child(0).text() + " - " + data.child(1).text());
+                MyHazeData tmp = new MyHazeData();
+                
+                tmp.setState(data.child(0).text());
+                tmp.setArea(data.child(1).text());
+                hourData = getArrayHourData(this.hourOption, hourDataSize, data);
+                
+                tmp.setHourDataWithOption(this.hourOption, hourData);
+                
+                datas.add(tmp);
+                tmp = null; //optimization
             }
-            //System.out.println(tableData);
-            
         }
         else
         {
             
         }
+        return datas;
     }
     
     public static void main(String[] args)
     {
-        ApiReader api = new ApiReader("Mozilla", 3, "2013-10-08", 
+        ApiReader api = new ApiReader("Mozilla", 1, "2013-10-08", 
                 false, null,null, null);
         api.setDocument(api.getDocument());
         
-        api.buildData();
+        ArrayList<MyHazeData> datas = api.buildData();
+        for (MyHazeData hazeData : datas)
+        {
+            System.out.println(hazeData.toString());
+        }
         
         //Elements tableData = api.getDocument().select("table.table1 tr");
         
