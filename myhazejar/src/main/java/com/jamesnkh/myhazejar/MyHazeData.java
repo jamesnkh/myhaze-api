@@ -1,5 +1,7 @@
 package com.jamesnkh.myhazejar;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 public class MyHazeData
@@ -8,10 +10,10 @@ public class MyHazeData
     private final int HOURS_PER_DAY= 24;
     private String state;
     private String area;
-    private int[] hourData1 = new int[HOUR_DATA_SIZE];
-    private int[] hourData2 = new int[HOUR_DATA_SIZE];
-    private int[] hourData3 = new int[HOUR_DATA_SIZE];
-    private int[] hourData4 = new int[HOUR_DATA_SIZE];
+    private ArrayList<MyHazeDataValue> hourData1 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
+    private ArrayList<MyHazeDataValue> hourData2 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
+    private ArrayList<MyHazeDataValue> hourData3 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
+    private ArrayList<MyHazeDataValue> hourData4 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
     private String date;
     
     public MyHazeData()
@@ -19,10 +21,10 @@ public class MyHazeData
         super();
     }
 
-    public MyHazeData(String state, String area, int[] hourData1, 
-            int[] hourData2,
-            int[] hourData3,
-            int[] hourData4,
+    public MyHazeData(String state, String area, ArrayList<MyHazeDataValue> hourData1, 
+            ArrayList<MyHazeDataValue> hourData2,
+            ArrayList<MyHazeDataValue> hourData3,
+            ArrayList<MyHazeDataValue> hourData4,
             String date)
     {
         this.state = state;
@@ -34,7 +36,7 @@ public class MyHazeData
         this.date = date;
     }
     
-    public void setHourDataWithOption(int hourOption, int[] hourData)
+    public void setHourDataWithOption(int hourOption, ArrayList<MyHazeDataValue> hourData)
     {
         if (hourOption == 1)
         {
@@ -78,42 +80,42 @@ public class MyHazeData
         this.area = area;
     }
 
-    public int[] getHourData1()
+    public ArrayList<MyHazeDataValue> getHourData1()
     {
         return hourData1;
     }
 
-    public void setHourData1(int[] hourData1)
+    public void setHourData1(ArrayList<MyHazeDataValue> hourData1)
     {
         this.hourData1 = hourData1;
     }
 
-    public int[] getHourData2()
+    public ArrayList<MyHazeDataValue> getHourData2()
     {
         return hourData2;
     }
 
-    public void setHourData2(int[] hourData2)
+    public void setHourData2(ArrayList<MyHazeDataValue> hourData2)
     {
         this.hourData2 = hourData2;
     }
 
-    public int[] getHourData3()
+    public ArrayList<MyHazeDataValue> getHourData3()
     {
         return hourData3;
     }
 
-    public void setHourData3(int[] hourData3)
+    public void setHourData3(ArrayList<MyHazeDataValue> hourData3)
     {
         this.hourData3 = hourData3;
     }
 
-    public int[] getHourData4()
+    public ArrayList<MyHazeDataValue> getHourData4()
     {
         return hourData4;
     }
 
-    public void setHourData4(int[] hourData4)
+    public void setHourData4(ArrayList<MyHazeDataValue> hourData4)
     {
         this.hourData4 = hourData4;
     }
@@ -128,12 +130,13 @@ public class MyHazeData
         this.date = date;
     }
     
-    public int[] getHourDataFullDay()
+    public ArrayList<MyHazeDataValue> getHourDataFullDay()
     {
-        int[] result = new int[HOURS_PER_DAY];
-        result = ArrayUtils.addAll(this.getHourData1(), this.getHourData2());
-        result = ArrayUtils.addAll(result, this.getHourData3());
-        result = ArrayUtils.addAll(result, this.getHourData4());
+        ArrayList<MyHazeDataValue> result = new ArrayList<MyHazeDataValue>(HOURS_PER_DAY);
+        result = this.getHourData1();
+        result.addAll(this.getHourData2());
+        result.addAll(this.getHourData3());
+        result.addAll(this.getHourData4());
         return result;
     }
     
@@ -142,16 +145,18 @@ public class MyHazeData
         String result =  "MyHazeData[state: " + state 
                 + ", area: " + area
                 + ", hourData: {";
-        int[] hourDataFullDay = getHourDataFullDay();
-        for (int i=0; i<hourDataFullDay.length; i++)
+        ArrayList<MyHazeDataValue> hourDataFullDay = getHourDataFullDay();
+        
+        
+        for (int i=0; i<hourDataFullDay.size(); i++)
         {
-            if (i != hourDataFullDay.length-1)
+            if (i != hourDataFullDay.size()-1)
             {
-                result += hourDataFullDay[i] + ", ";
+                result += hourDataFullDay.get(i).getValue() + ", ";
             }
             else
             {
-                result += hourDataFullDay[i];
+                result += hourDataFullDay.get(i).getValue();
             }
         }
         result += "}]";
