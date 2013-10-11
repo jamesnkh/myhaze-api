@@ -2,19 +2,19 @@ package com.jamesnkh.myhazejar.models;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 public class MyHazeData
 {
-    private final int HOUR_DATA_SIZE = 6;
-    private final int HOURS_PER_DAY= 24;
-    private String state;
-    private String area;
+    public static final int HOUR_DATA_SIZE = 6;
+    public static final int HOURS_PER_DAY= 24;
+    public static final Integer[] HOUR_OPTIONS = {1,2,3,4};
+    
+    private String state = "";
+    private String area = "";
     private ArrayList<MyHazeDataValue> hourData1 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
     private ArrayList<MyHazeDataValue> hourData2 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
     private ArrayList<MyHazeDataValue> hourData3 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
     private ArrayList<MyHazeDataValue> hourData4 = new ArrayList<MyHazeDataValue>(HOUR_DATA_SIZE);
-    private String date;
+    private String date = "";
     
     public MyHazeData()
     {
@@ -87,7 +87,7 @@ public class MyHazeData
 
     public void setHourData1(ArrayList<MyHazeDataValue> hourData1)
     {
-        this.hourData1 = hourData1;
+        this.hourData1 = (ArrayList<MyHazeDataValue>)hourData1.clone();
     }
 
     public ArrayList<MyHazeDataValue> getHourData2()
@@ -97,7 +97,7 @@ public class MyHazeData
 
     public void setHourData2(ArrayList<MyHazeDataValue> hourData2)
     {
-        this.hourData2 = hourData2;
+        this.hourData2 = (ArrayList<MyHazeDataValue>)hourData2.clone();
     }
 
     public ArrayList<MyHazeDataValue> getHourData3()
@@ -107,7 +107,7 @@ public class MyHazeData
 
     public void setHourData3(ArrayList<MyHazeDataValue> hourData3)
     {
-        this.hourData3 = hourData3;
+        this.hourData3 = (ArrayList<MyHazeDataValue>)hourData3.clone();
     }
 
     public ArrayList<MyHazeDataValue> getHourData4()
@@ -117,12 +117,12 @@ public class MyHazeData
 
     public void setHourData4(ArrayList<MyHazeDataValue> hourData4)
     {
-        this.hourData4 = hourData4;
+        this.hourData4 = (ArrayList<MyHazeDataValue>)hourData4.clone();
     }
 
     public String getDate()
     {
-        return date;
+        return this.date;
     }
 
     public void setDate(String date)
@@ -142,11 +142,11 @@ public class MyHazeData
     
     public String toString()
     {
-        String result =  "MyHazeData[state: " + state 
-                + ", area: " + area
+        String result =  "MyHazeData[state: " + getState() 
+                + ", area: " + getArea()
+                + ", date: " + getDate()
                 + ", hourData: {";
         ArrayList<MyHazeDataValue> hourDataFullDay = getHourDataFullDay();
-        
         
         for (int i=0; i<hourDataFullDay.size(); i++)
         {

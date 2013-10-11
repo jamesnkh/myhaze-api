@@ -36,7 +36,6 @@ public class ApiReader
     private String proxyHost;
     private String proxyPort;
     
-    private static final Integer[] HOUR_OPTIONS = {1,2,3,4};
     private static final int FULL_DAY_HOUR_OPTION = -1;
     private static final String MY_HAZE_URL_PREFIX = "http://apims.doe.gov.my/apims/hourly";
     private static final String MY_HAZE_URL_POSTFIX = ".php?date=";
@@ -77,9 +76,9 @@ public class ApiReader
             System.setProperty(this.proxyProtocol + ".proxyPort", this.proxyPort);
         }
         String webUrl = "";
-        int lastHourOptionsIndex = HOUR_OPTIONS.length - 1;
-        if (this.hourOption >= HOUR_OPTIONS[0] && 
-                this.hourOption <= HOUR_OPTIONS[lastHourOptionsIndex])
+        int lastHourOptionsIndex = MyHazeData.HOUR_OPTIONS.length - 1;
+        if (this.hourOption >= MyHazeData.HOUR_OPTIONS[0] && 
+                this.hourOption <= MyHazeData.HOUR_OPTIONS[lastHourOptionsIndex])
         {
             webUrl = buildMyHazeUrl(this.hourOption, this.date);
             connectToMyHazeUrl(webUrl);
@@ -121,11 +120,11 @@ public class ApiReader
     {
         //sanity check if the hour option is valid
         //fallback to first hour option if not valid
-        HashSet<Integer> set= new HashSet<Integer>(Arrays.asList(HOUR_OPTIONS));
+        HashSet<Integer> set= new HashSet<Integer>(Arrays.asList(MyHazeData.HOUR_OPTIONS));
         String webUrl = "";
         if (!set.contains(hourOption))
         {
-            this.hourOption = HOUR_OPTIONS[0];
+            this.hourOption = MyHazeData.HOUR_OPTIONS[0];
         }
         else
         {
@@ -166,159 +165,33 @@ public class ApiReader
     {
         //this function is only applicable when hourOption is valid
         ArrayList<MyHazeData> datas = new ArrayList<MyHazeData>();
-        if (this.hourOption == -1)
-        {
-            return buildDataFullDay();
-        }
         
-        else 
-        {
-            int hourDivider = HOUR_OPTIONS.length;
-            int hourDataSize = HOURS_PER_DAY / hourDivider;
-            ArrayList<MyHazeDataValue> hourData = new ArrayList<MyHazeDataValue>(hourDataSize); 
-            
-            if (this.doc != null)
-            {
-                //do more things
-                Elements tableData = this.doc.select("table.table1 tr:gt(0)");
-                
-                for (Element data : tableData)
-                {
-                    MyHazeData tmp = new MyHazeData();
-                    
-                    tmp.setState(data.child(0).text());
-                    tmp.setArea(data.child(1).text());
-                    hourData = getArrayHourData(hourDataSize, data);
-                    tmp.setHourDataWithOption(this.hourOption, hourData);
-                    
-                    datas.add(tmp);
-                    tmp = null; //optimization
-                }
-            }
-            else
-            {
-                
-            }
-        }
-        return datas;
-    }
-    
-    private ArrayList<MyHazeData> buildDataFullDay()
-    {
-        ArrayList<MyHazeData> datas = new ArrayList<MyHazeData>();
-        int hourDivider = HOUR_OPTIONS.length;
+        int hourDivider = MyHazeData.HOUR_OPTIONS.length;
         int hourDataSize = HOURS_PER_DAY / hourDivider;
-        ArrayList<MyHazeDataValue> hourData = new ArrayList<MyHazeDataValue>(hourDataSize);
-
-        // monster code here, 4 loop for jsoup connections when necessary if request date is not today
-        for (int i=HOUR_OPTIONS[0]; i<=2/*HOUR_OPTIONS[hourDivider-1]*/; i++)
+        ArrayList<MyHazeDataValue> hourData = new ArrayList<MyHazeDataValue>(hourDataSize); 
+        
+        if (this.doc != null)
+        {
+            //do more things
+            Elements tableData = this.doc.select("table.table1 tr:gt(0)");
+            
+            for (Element data : tableData)
+            {
+                MyHazeData tmp = new MyHazeData();
+                tmp.setDate(this.date);
+                tmp.setState(data.child(0).text());
+                tmp.setArea(data.child(1).text());
+                hourData = getArrayHourData(hourDataSize, data);
+                tmp.setHourDataWithOption(this.hourOption, hourData);
+                
+                datas.add(tmp);
+                tmp = null; //optimization
+            }
+        }
+        else
         {
             
-            String webUrl = buildMyHazeUrl(i, this.date);
-            
-            try
-            {
-                this.doc = Jsoup.connect(webUrl)
-                    .timeout(CONNECTION_TIME_OUT)
-                    .userAgent(this.userAgent)
-                    .get();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            
-            if (this.doc != null)
-            {
-                //do more things
-                Elements tableData = this.doc.select("table.table1 tr:gt(0)");
-                
-                for (Element data : tableData)
-                {
-                    if (i == HOUR_OPTIONS[0]) //set this the first time only
-                    {
-                        MyHazeData tmp = new MyHazeData();
-                        tmp.setState(data.child(0).text());
-                        tmp.setArea(data.child(1).text());
-                        hourData = getArrayHourData(hourDataSize, data);
-                        tmp.setHourDataWithOption(this.hourOption, hourData);
-                        datas.add(tmp);
-                        tmp = null;
-                    }
-                }
-                
-                if (i > HOUR_OPTIONS[0])
-                {
-                    Elements tableData1 = this.doc.select("table.table1 tr:gt(0)");
-                    for (MyHazeData myHazeData : datas)
-                    {
-                        //System.out.println("debug: " + myHazeData.getState() + " - " + myHazeData.getArea());
-                        for (Element data : tableData1)
-                        {
-                            hourData = getArrayHourData(hourDataSize, data); //TODO: BUG
-                            myHazeData.setHourDataWithOption(i, hourData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                //do nothing for now
-            }
-            
-            /*
-            if (this.doc != null)
-            {
-                //do more things
-                Elements tableData = this.doc.select("table.table1 tr:gt(0)");
-                for (Element data : tableData)
-                {   
-                    if (i == HOUR_OPTIONS[0]) //set this the first time only
-                    {
-                        tmp.setState(data.child(0).text());
-                        tmp.setArea(data.child(1).text());
-                        hourData = getArrayHourData(hourDataSize, data);
-                        tmp.setHourDataWithOption(i, hourData);
-                        datas.add(tmp);
-                        //System.out.println("debug: " + tmp.toString());
-                    }
-                    else //update the next hour option data from the same data arraylist
-                    {
-                        for (MyHazeData myHazeData : datas)
-                        {
-                            hourData = getArrayHourData(hourDataSize, data);
-                            myHazeData.setHourDataWithOption(i, hourData);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                
-            }
-            */
         }
-        //tmp = null; //clean up
         return datas;
-    }
-    
-    public static void main(String[] args)
-    {
-        ApiReader api = new ApiReader("Mozilla", -1, "2013-10-08", 
-                false, null,null, null);
-        api.setDocument(api.getDocument());
-        
-        ArrayList<MyHazeData> datas = api.buildDataWithHourOption();
-        
-        
-        for (MyHazeData hazeData : datas)
-        {
-            System.out.println(hazeData.toString());
-        }
-        
-        //Elements tableData = api.getDocument().select("table.table1 tr");
-        
-        //System.out.println(test);
-        
     }
 }
