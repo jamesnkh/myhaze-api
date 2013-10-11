@@ -59,7 +59,7 @@ public class MyHazeDataValue
             {
                 this.value = HOUR_DATA_INVALID_VALUE;
             }
-            this.infoShort = HOUR_DATA_INVALID_INFO;
+            this.infoShort = HOUR_DATA_INVALID;
             this.infoLong = HOUR_DATA_INVALID_INFO;
         }
         
@@ -67,7 +67,7 @@ public class MyHazeDataValue
         {
             try
             {
-                this.value = Integer.parseInt(input.substring(0, length -1));
+                this.value = Integer.parseInt(input.substring(0, length - 1));
             }
             catch (NumberFormatException e)
             {
@@ -100,9 +100,17 @@ public class MyHazeDataValue
             }
             else
             {
-                this.value = HOUR_DATA_INVALID_VALUE;
-                this.infoLong = HOUR_DATA_INVALID_INFO;
-                this.infoShort = HOUR_DATA_INVALID;
+                if (!StringUtils.isNumeric(this.infoShort))
+                {
+                    this.infoLong = HOUR_DATA_INVALID_INFO;
+                    this.infoShort = HOUR_DATA_INVALID;
+                }
+                else // fallback for unhandled cases
+                {
+                    this.value = HOUR_DATA_INVALID_VALUE;
+                    this.infoLong = HOUR_DATA_INVALID_INFO;
+                    this.infoShort = HOUR_DATA_INVALID;
+                }
             }
         }
     }
