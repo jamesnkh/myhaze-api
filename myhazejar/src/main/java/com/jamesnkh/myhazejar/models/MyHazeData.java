@@ -1,4 +1,4 @@
-package com.jamesnkh.myhazejar;
+package com.jamesnkh.myhazejar.models;
 
 import java.util.ArrayList;
 
