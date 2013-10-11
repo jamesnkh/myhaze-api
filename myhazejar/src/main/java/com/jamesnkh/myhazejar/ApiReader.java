@@ -11,6 +11,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jamesnkh.myhazejar.models.MyHazeData;
+import com.jamesnkh.myhazejar.models.MyHazeDataValue;
+
 /**
  * Reads Malaysia's Department of Environmental's API data from
  * 
@@ -206,10 +209,9 @@ public class ApiReader
         int hourDivider = HOUR_OPTIONS.length;
         int hourDataSize = HOURS_PER_DAY / hourDivider;
         ArrayList<MyHazeDataValue> hourData = new ArrayList<MyHazeDataValue>(hourDataSize);
-       
-        
+
         // monster code here, 4 loop for jsoup connections when necessary if request date is not today
-        for (int i=HOUR_OPTIONS[0]; i<HOUR_OPTIONS[hourDivider-1]; i++)
+        for (int i=HOUR_OPTIONS[0]; i<=2/*HOUR_OPTIONS[hourDivider-1]*/; i++)
         {
             
             String webUrl = buildMyHazeUrl(i, this.date);
@@ -247,9 +249,11 @@ public class ApiReader
                 
                 if (i > HOUR_OPTIONS[0])
                 {
+                    Elements tableData1 = this.doc.select("table.table1 tr:gt(0)");
                     for (MyHazeData myHazeData : datas)
                     {
-                        for (Element data : tableData)
+                        //System.out.println("debug: " + myHazeData.getState() + " - " + myHazeData.getArea());
+                        for (Element data : tableData1)
                         {
                             hourData = getArrayHourData(hourDataSize, data); //TODO: BUG
                             myHazeData.setHourDataWithOption(i, hourData);
@@ -305,6 +309,7 @@ public class ApiReader
         api.setDocument(api.getDocument());
         
         ArrayList<MyHazeData> datas = api.buildDataWithHourOption();
+        
         
         for (MyHazeData hazeData : datas)
         {
