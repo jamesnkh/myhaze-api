@@ -70,6 +70,21 @@ public class MyHazeDataValueTest
         assertEquals(dataValue.getValue(), -1);
         assertEquals(dataValue.getInfoShort(), MyHazeDataValue.HOUR_DATA_INVALID);
         assertEquals(dataValue.getInfoLong(), MyHazeDataValue.HOUR_DATA_INVALID_INFO);
+        
+        dataValue.parse("0"); //super clean air
+        assertEquals(dataValue.getValue(), 0);
+        assertEquals(dataValue.getInfoShort(), MyHazeDataValue.HOUR_DATA_INVALID);
+        assertEquals(dataValue.getInfoLong(), MyHazeDataValue.HOUR_DATA_INVALID_INFO);
+        
+        dataValue.parse("#");
+        assertEquals(dataValue.getValue(), MyHazeDataValue.HOUR_DATA_INVALID_VALUE);
+        assertEquals(dataValue.getInfoShort(), MyHazeDataValue.HOUR_DATA_INVALID);
+        assertEquals(dataValue.getInfoLong(), MyHazeDataValue.HOUR_DATA_INVALID_INFO);
+        
+        dataValue.parse("(");
+        assertEquals(dataValue.getValue(), MyHazeDataValue.HOUR_DATA_INVALID_VALUE);
+        assertEquals(dataValue.getInfoShort(), MyHazeDataValue.HOUR_DATA_INVALID);
+        assertEquals(dataValue.getInfoLong(), MyHazeDataValue.HOUR_DATA_INVALID_INFO);
     }
 
 }
